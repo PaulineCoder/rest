@@ -24,7 +24,7 @@ public class AdminController {
     @RequestMapping("/getAll")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.listUsers());
-        return "app";
+        return "admin";
     }
 
     @RequestMapping("/getOne")
