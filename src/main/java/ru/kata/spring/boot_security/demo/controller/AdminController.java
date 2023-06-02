@@ -1,11 +1,14 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
+
+import java.util.Arrays;
 
 
 @Controller
@@ -18,45 +21,40 @@ public class AdminController {
         this.userService = userService;
     }
 
-
-    @GetMapping()
+    @RequestMapping("/getAll")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.listUsers());
-        return "users";
+        return "app";
     }
 
-    @GetMapping("/{id}")
-    public String showUser(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.showUser(id));
-        return "user";
+    @RequestMapping("/getOne")
+    @ResponseBody
+    public User showUser(long id) {
+        return userService.showUser(id);
     }
 
-    @GetMapping("/new")
-    public String newUser(@ModelAttribute("user") User user) {
-        return "new";
-    }
-
-    @PostMapping()
-    public String create(@ModelAttribute("user") User user) {
+    @PostMapping("/addNew")
+    public String addNew(User user) {
         userService.add(user);
-        return "redirect:/admin";
+        return "redirect:/admin/getAll";
     }
 
-    @GetMapping("/{id}/update")
-    public String update(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.showUser(id));
-        return "update";
+    @RequestMapping(value = "/update", method = {RequestMethod.PUT, RequestMethod.GET})
+    public String update(User user) {
+        userService.update(user);
+        return "redirect:/admin/getAll";
     }
 
-    @PatchMapping("/{id}")
-    public String update(@ModelAttribute("user") User user, @PathVariable("id") long id) {
-        userService.update(id, user);
-        return "redirect:/admin";
-    }
-
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable("id") long id) {
+    @RequestMapping(value = "/delete", method = {RequestMethod.DELETE, RequestMethod.GET})
+    public String delete(long id) {
         userService.delete(id);
-        return "redirect:/admin";
+        return "redirect:/admin/getAll";
+    }
+
+    @ModelAttribute
+    public void getUsername(Authentication authentication, Model model) {
+        model.addAttribute("usernameUser", authentication.getName());
+        model.addAttribute("rolesUser", Arrays.toString(authentication.getAuthorities().toArray()).replace("[", "")
+                .replace("]", ""));
     }
 }

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="/webjars/jquery/3.4.1/jquery.min.js"></script>
+    <link href="/webjars/bootstrap/4.3.1/css/bootstrap.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script defer type="text/javascript" th:src="@{/js/main.js}" src="/static/js/main.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div class="bg-dark" style="height: 40px;">
+    <div class="container-fluid">
+        <div class="text-light pt-1">
+            <strong><a class="h5" th:text="${usernameUser}"></a></strong>
+            <a>with roles:</a>
+            <a th:text="${rolesUser}"></a>
+            <a class="text-light" style="float:right" href="/logout" th:method="get">Logout</a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" style="background-color:whitesmoke;">
+    <div class="row">
+        <div class="col-md-2 nav-pills p-1 m-0" style="background-color: white">
+            <nav sec:authorize="hasAuthority('ROLE_ADMIN')" class="nav-link active">
+                <form th:action="@{/admin/getAll}" th:method="get">
+                    <a class="text-decoration-none" href="/admin/getAll" th:method="get" style="color: white">Admin</a>
+                </form>
+            </nav>
+            <nav sec:authorize="hasAnyAuthority('ROLE_USER','ROLE_ADMIN')" class="nav-link">
+                <form th:action="@{/user/}" th:method="get">
+                    <a class="text-decoration-none" href="/user/" th:method="get">User</a>
+                </form>
+            </nav>
+        </div>
+        <div class="col-md-10 p-lg-4" style="height: 1000px">
+            <p class="h1">Admin panel</p>
+            <ul class="nav nav-tabs ">
+                <li class="nav-item">
+                    <a href="#combo" class="nav-link active" role="tab" data-toggle="tab">Users table</a>
+                </li>
+                <li class="nav-item ">
+                    <a href="#ko" class="nav-link" role="tab" data-toggle="tab">New user</a>
+                </li>
+            </ul>
+            <div class="tab-content" style="background-color: white">
+                <div role="tabpanel" class="tab-pane active" id="combo" style="border: 1px solid lightgray">
+                    <div class="h5 text-dark mb-4 p-lg-3 border-bottom " style="background-color:whitesmoke">All users
+                    </div>
+                    <div class="container-fluid">
+                        <table class="table table-striped border-top">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Edit</th>
+                                <th scope="col">Delete</th>
+                            </tr>
+                            <tr th:each="user : ${users}">
+                                <td th:utext="${user.getId()}"></td>
+                                <td th:utext="${user.getName()}"></td>
+                                <td th:utext="${user.getSurname()}"></td>
+                                <td th:utext="${user.getAge()}"></td>
+                                <td th:utext="${user.getEmail()}"></td>
+                                <td th:utext="${user.getRolesWithout()}"></td>
+                                <td><a th:href="@{/admin/getOne/(id=${user.getId()})}" class="btn btn-primary"
+                                       id="editButton">Edit</a></td>
+                                <td><a th:href="@{/admin/getOne/(id=${user.getId()})}" class="btn btn-danger"
+                                       id="deleteButton">Delete</a>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="modal fade" id="editModal" tabindex="-1" role="dialog"
+                             aria-labelledby="eModalLabel" aria-hidden="true">
+                            <form th:action="@{/admin/update}" th:method="PUT">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="eModalLabel">Edit user</h5>
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal"
+                                                    aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <label for="idMain" class="form-label mb-0 "><strong>
+                                                Id</strong> </label>
+                                            <br>
+                                            <input class="form-control-sm mb-2 "
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="idMain"
+                                                   name="id"
+                                                   placeholder="Id" readonly/>
+                                            <br>
+                                            <label for="firstNameEdit" class="form-label mb-0 "><strong>
+                                                First name</strong> </label>
+                                            <br>
+                                            <input class="form-control-sm mb-2 "
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="firstNameEdit"
+                                                   name="name"
+                                                   placeholder="First name"/>
+                                            <br>
+                                            <label for="lastNameEdit" class="form-label mb-0"><strong>Last
+                                                name</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="lastNameEdit"
+                                                   name="surname"
+                                                   placeholder="Last name"/>
+                                            <br>
+                                            <label for="ageEdit"
+                                                   class="form-label mb-0"><strong>Age</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="ageEdit"
+                                                   name="age"
+                                                   placeholder="Age"/>
+                                            <br>
+                                            <label for="emailEdit"
+                                                   class="form-label mb-0"><strong>Email</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="emailEdit"
+                                                   name="email"
+                                                   placeholder="Email"/>
+                                            <br>
+                                            <label for="passwordEdit" class="form-label mb-0"><strong>Password</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray;"
+                                                   type="text" id="passwordEdit"
+                                                   name="password"
+                                                   placeholder="Password"/>
+                                            <br>
+                                            <label for="roleNameEdit"
+                                                   class="form-label mb-0"><strong>Role</strong></label>
+                                            <br>
+                                            <select class="form-label mb-3"
+                                                    style="width: 300px; border: 1px solid lightgray"
+                                                    aria-label="Default select" type="text"
+                                                    name="roleName"
+                                                    id="roleNameEdit">
+                                                <option value="ROLE_USER">USER</option>
+                                                <option value="ROLE_ADMIN">ADMIN</option>
+                                            </select>
+                                            <br>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Close
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">Edit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
+                             aria-labelledby="dModalLabel" aria-hidden="true">
+                            <form th:action="@{/admin/delete}" th:method="DELETE">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="dModalLabel">Delete user</h5>
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal"
+                                                    aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <label for="idDelete" class="form-label mb-0 "><strong>
+                                                Id</strong> </label>
+                                            <br>
+                                            <input class="form-control-sm mb-2 "
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="idDelete"
+                                                   name="id"
+                                                   placeholder="Id" readonly/>
+                                            <br>
+                                            <label for="firstNameDelete" class="form-label mb-0 "><strong>
+                                                First name</strong> </label>
+                                            <br>
+                                            <input class="form-control-sm mb-2 "
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="firstNameDelete"
+                                                   name="name"
+                                                   placeholder="First name" readonly/>
+                                            <br>
+                                            <label for="lastNameDelete" class="form-label mb-0"><strong>Last
+                                                name</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="lastNameDelete"
+                                                   name="surname"
+                                                   placeholder="Last name" readonly/>
+                                            <br>
+                                            <label for="ageDelete"
+                                                   class="form-label mb-0"><strong>Age</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="ageDelete"
+                                                   name="age"
+                                                   placeholder="Age" readonly/>
+                                            <br>
+                                            <label for="emailDelete"
+                                                   class="form-label mb-0"><strong>Email</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray"
+                                                   type="text" id="emailDelete"
+                                                   name="email"
+                                                   placeholder="Email" readonly/>
+                                            <br>
+                                            <label for="passwordDelete"
+                                                   class="form-label mb-0"><strong>Password</strong></label>
+                                            <br>
+                                            <input class="form-control-sm mb-2"
+                                                   style="width: 300px; border: 1px solid lightgray;"
+                                                   type="text" id="passwordDelete"
+                                                   name="password"
+                                                   placeholder="Password" readonly/>
+                                            <br>
+                                            <label for="roleNameDelete"
+                                                   class="form-label mb-0"><strong>Role</strong></label>
+                                            <br>
+                                            <select class="form-label mb-3"
+                                                    style="width: 300px; border: 1px solid lightgray"
+                                                    aria-label="Default select" type="text"
+                                                    name="roleName"
+                                                    id="roleNameDelete">
+                                                <option value="ROLE_USER">USER</option>
+                                                <option value="ROLE_ADMIN">ADMIN</option>
+                                            </select>
+                                            <br>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Close
+                                            </button>
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="ko" style="border: 1px solid lightgray">
+                    <div class="container text-center">
+                        <form th:action="@{/admin/addNew}" th:method="POST">
+                            <label for="firstName" class="form-label pt-3 mb-0 "><strong> First name</strong> </label>
+                            <br>
+                            <input class="form-control-sm mb-2 " style="width: 300px; border: 1px solid lightgray"
+                                   type="text" name="name" id="firstName" placeholder="First name"/>
+                            <br>
+                            <label for="lastName" class="form-label mb-0"><strong>Last name</strong></label>
+                            <br>
+                            <input class="form-control-sm mb-2" style="width: 300px; border: 1px solid lightgray"
+                                   type="text" name="surname" id="lastName" placeholder="Last name"/>
+                            <br>
+                            <label for="age" class="form-label mb-0"><strong>Age</strong></label>
+                            <br>
+                            <input class="form-control-sm mb-2" style="width: 300px; border: 1px solid lightgray"
+                                   type="text" name="age" id="age" placeholder="Age"/>
+                            <br>
+                            <label for="email" class="form-label mb-0"><strong>Email</strong></label>
+                            <br>
+                            <input class="form-control-sm mb-2" style="width: 300px; border: 1px solid lightgray"
+                                   type="text" name="email" id="email" placeholder="Email"/>
+                            <br>
+                            <label for="password" class="form-label mb-0"><strong>Password</strong></label>
+                            <br>
+                            <input class="form-control-sm mb-2" style="width: 300px; border: 1px solid lightgray;"
+                                   type="text" name="password" id="password" placeholder="Password"/>
+                            <br>
+                            <label for="role" class="form-label mb-0"><strong>Role</strong></label>
+                            <br>
+                            <select class="form-label mb-3" style="width: 300px; border: 1px solid lightgray"
+                                    aria-label="Default select" type="text" name="roleName" id="role">
+                                <option value="ROLE_USER">USER</option>
+                                <option value="ROLE_ADMIN">ADMIN</option>
+                            </select>
+                            <br>
+                            <input class="btn btn-success btn mb-3" type="submit" value="Add new user"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

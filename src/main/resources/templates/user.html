@@ -1,36 +1,81 @@
 <!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<html lang="en">
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="/webjars/jquery/3.4.1/jquery.min.js"></script>
+    <link href="/webjars/bootstrap/4.3.1/css/bootstrap.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script defer type="text/javascript" th:src="@{/js/main.js}" src="/static/js/main.js"></script>
     <title>User</title>
 </head>
 <body>
-<div>
-    <br>
-    <table border="1">
-        <tr>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Age</th>
-            <th>Password</th>
-            <th>Roles</th>
-        </tr>
-        <tr>
-            <td th:utext="${user.getName()}"></td>
-            <td th:utext="${user.getSurname()}"></td>
-            <td th:utext="${user.getAge()}"></td>
-            <td th:utext="${user.getPassword()}"></td>
-            <td th:each="role : ${user.getRoles()}"
-                th:value="${role.name}"
-                th:text="${role.name}"></td>
-        </tr>
-    </table>
-    <br>
-    <a>
-        <form th:method="GET" th:action="@{/logout}"><input type="submit"
-                                                            value="logout"></form>
-    </a>
+<div class="bg-dark" style="height: 40px;">
+    <div class="container-fluid">
+        <div class="text-light pt-1">
+            <strong><a class="h5"
+                       th:text="${usernameUser}"></a></strong>
+            <a>with roles:</a>
+            <a th:text="${rolesUser}"></a>
+            <a class="text-light " style="float:right" href="/logout" th:method="get">Logout</a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" style="background-color:whitesmoke;">
+    <div class="row">
+        <div th:switch="${user.getRoleName()}" class="col-md-2 nav-pills p-1 m-0" style="background-color: white">
+            <div th:case="'ROLE_ADMIN'">
+                <nav sec:authorize="hasRole('ROLE_ADMIN')" class="nav-link">
+                    <form th:action="@{/admin/getAll}" th:method="get">
+                        <a href="/admin/getAll" th:method="get">Admin</a>
+                    </form>
+                </nav>
+                <nav sec:authorize="hasRole('USER')" class="nav-link active">
+                    <form th:action="@{/user/}" th:method="get">
+                        <a class="text-light" href="/user/" th:method="get">User</a>
+                    </form>
+                </nav>
+            </div>
+            <div th:case="'ROLE_USER'">
+                <nav sec:authorize="hasRole('USER')" class="nav-link active">
+                    <form th:action="@{/user/}" th:method="get">
+                        <a class="text-light" href="/user/" th:method="get">User</a>
+                    </form>
+                </nav>
+            </div>
+        </div>
+        <div class="col-md-10 p-lg-4" style="height: 1000px">
+            <p class="h1">User information-page</p>
+            <div class="tab-content" style="background-color: white">
+                <div role="tabpanel" class="tab-pane active" id="combo" style="border: 1px solid lightgray">
+                    <div class="h5 text-dark mb-4 p-lg-3 border-bottom " style="background-color:whitesmoke">About user
+                    </div>
+                    <div class="container-fluid">
+                        <table class="table table-striped border-top">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Role</th>
+                            </tr>
+                            <tr>
+                                <td th:utext="${user.getId()}"></td>
+                                <td th:utext="${user.getName()}"></td>
+                                <td th:utext="${user.getSurname()}"></td>
+                                <td th:utext="${user.getAge()}"></td>
+                                <td th:utext="${user.getEmail()}"></td>
+                                <td th:utext="${user.getRolesWithout()}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

@@ -4,6 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -21,6 +22,8 @@ public class User implements UserDetails {
 
     @Column(name = "surname")
     private String surname;
+    @Column(name = "email")
+    private String email;
 
     @Column(name = "age")
     private int age;
@@ -28,21 +31,29 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Transient
     private String roleName;
 
     @ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
     private Set<Role> roles;
 
-
     public User() {
     }
 
-    public User(String name, String surname, int age, String roleName) {
+    public User(String name, String email, String surname, int age, String password, String roleName) {
         this.name = name;
+        this.email = email;
         this.surname = surname;
         this.age = age;
+        this.password = password;
         this.roleName = roleName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Long getId() {
@@ -93,6 +104,10 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
+    public String getRolesWithout(){
+        return Arrays.toString(getRoles().toArray()).replace("[","").replace("]","");
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles();
@@ -109,7 +124,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return name;
+        return email;
     }
 
     @Override
