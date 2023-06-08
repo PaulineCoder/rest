@@ -1,24 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript" src="/webjars/jquery/3.4.1/jquery.min.js"></script>
     <link href="/webjars/bootstrap/4.3.1/css/bootstrap.css" rel="stylesheet"/>
     <script type="text/javascript" src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script defer type="text/javascript" th:src="@{/js/main.js}" src="/static/js/main.js"></script>
-    <title>Title</title>
+    <script defer type="text/javascript" th:src="@{/js/main.js}" src="/js/main.js"></script>
+    <title>App</title>
 </head>
-<body>
+<body onload="loadUsersTable()">
 <div class="bg-dark" style="height: 40px;">
     <div class="container-fluid">
-        <div class="text-light pt-1">
-            <strong><a class="h5" th:text="${usernameUser}"></a></strong>
-            <a>with roles:</a>
-            <a th:text="${rolesUser}"></a>
-            <a class="text-light" style="float:right" href="/logout" th:method="get">Logout</a>
+        <div id="infoCurrentUser" class="text-light pt-1">
         </div>
     </div>
 </div>
@@ -26,13 +21,13 @@
     <div class="row">
         <div class="col-md-2 nav-pills p-1 m-0" style="background-color: white">
             <nav sec:authorize="hasAuthority('ROLE_ADMIN')" class="nav-link active">
-                <form th:action="@{/admin/getAll}" th:method="get">
-                    <a class="text-decoration-none" href="/admin/getAll" th:method="get" style="color: white">Admin</a>
+                <form th:action="@{/panel/}" th:method="get">
+                    <a class="text-decoration-none" href="/panel/" th:method="get" style="color: white">Admin</a>
                 </form>
             </nav>
             <nav sec:authorize="hasAnyAuthority('ROLE_USER','ROLE_ADMIN')" class="nav-link">
-                <form th:action="@{/user/}" th:method="get">
-                    <a class="text-decoration-none" href="/user/" th:method="get">User</a>
+                <form id="userForm" th:action="@{/user/}" th:method="get">
+                    <a onclick="loadUserPage()" class="text-decoration-none" href="/user/" th:method="get">User</a>
                 </form>
             </nav>
         </div>
@@ -40,9 +35,10 @@
             <p class="h1">Admin panel</p>
             <ul class="nav nav-tabs ">
                 <li class="nav-item">
-                    <a href="#combo" class="nav-link active" role="tab" data-toggle="tab">Users table</a>
+                    <a href="#combo" id="usersTable" class="nav-link active" role="tab" data-toggle="tab"
+                       onclick="loadUsersTable()">Users table</a>
                 </li>
-                <li class="nav-item ">
+                <li class="nav-item">
                     <a href="#ko" class="nav-link" role="tab" data-toggle="tab">New user</a>
                 </li>
             </ul>
@@ -51,8 +47,8 @@
                     <div class="h5 text-dark mb-4 p-lg-3 border-bottom " style="background-color:whitesmoke">All users
                     </div>
                     <div class="container-fluid">
-                        <table class="table table-striped border-top">
-                            <tr>
+                        <table id="tableDi" class="table table-striped border-top">
+                            <tr class="bg-white">
                                 <th scope="col">ID</th>
                                 <th scope="col">First Name</th>
                                 <th scope="col">Last Name</th>
@@ -62,23 +58,12 @@
                                 <th scope="col">Edit</th>
                                 <th scope="col">Delete</th>
                             </tr>
-                            <tr th:each="user : ${users}">
-                                <td th:utext="${user.getId()}"></td>
-                                <td th:utext="${user.getName()}"></td>
-                                <td th:utext="${user.getSurname()}"></td>
-                                <td th:utext="${user.getAge()}"></td>
-                                <td th:utext="${user.getEmail()}"></td>
-                                <td th:utext="${user.getRolesWithout()}"></td>
-                                <td><a th:href="@{/admin/getOne/(id=${user.getId()})}" class="btn btn-primary"
-                                       id="editButton">Edit</a></td>
-                                <td><a th:href="@{/admin/getOne/(id=${user.getId()})}" class="btn btn-danger"
-                                       id="deleteButton">Delete</a>
-                                </td>
-                            </tr>
+                            <tbody id="mainTable">
+                            </tbody>
                         </table>
                         <div class="modal fade" id="editModal" tabindex="-1" role="dialog"
                              aria-labelledby="eModalLabel" aria-hidden="true">
-                            <form th:action="@{/admin/update}" th:method="PUT">
+                            <form id="editForm">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -168,7 +153,7 @@
                         </div>
                         <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
                              aria-labelledby="dModalLabel" aria-hidden="true">
-                            <form th:action="@{/admin/delete}" th:method="DELETE">
+                            <form id="deleteForm">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -261,7 +246,7 @@
                 </div>
                 <div role="tabpanel" class="tab-pane" id="ko" style="border: 1px solid lightgray">
                     <div class="container text-center">
-                        <form th:action="@{/admin/addNew}" th:method="POST">
+                        <form id="createForm" action="/api/admin" method="POST">
                             <label for="firstName" class="form-label pt-3 mb-0 "><strong> First name</strong> </label>
                             <br>
                             <input class="form-control-sm mb-2 " style="width: 300px; border: 1px solid lightgray"
@@ -275,12 +260,12 @@
                             <label for="age" class="form-label mb-0"><strong>Age</strong></label>
                             <br>
                             <input class="form-control-sm mb-2" style="width: 300px; border: 1px solid lightgray"
-                                   type="text" name="age" id="age" placeholder="Age"/>
+                                   type="number" name="age" id="age" placeholder="Age"/>
                             <br>
                             <label for="email" class="form-label mb-0"><strong>Email</strong></label>
                             <br>
                             <input class="form-control-sm mb-2" style="width: 300px; border: 1px solid lightgray"
-                                   type="text" name="email" id="email" placeholder="Email"/>
+                                   type="email" name="email" id="email" placeholder="Email"/>
                             <br>
                             <label for="password" class="form-label mb-0"><strong>Password</strong></label>
                             <br>
@@ -290,7 +275,7 @@
                             <label for="role" class="form-label mb-0"><strong>Role</strong></label>
                             <br>
                             <select class="form-label mb-3" style="width: 300px; border: 1px solid lightgray"
-                                    aria-label="Default select" type="text" name="roleName" id="role">
+                                    aria-label="Default select" name="roleName" id="role" required>
                                 <option value="ROLE_USER">USER</option>
                                 <option value="ROLE_ADMIN">ADMIN</option>
                             </select>
